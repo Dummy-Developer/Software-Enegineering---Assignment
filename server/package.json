@@ -1,0 +1,29 @@
+{
+  "name": "kdurum",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/chungweileong94/KDURUM.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/chungweileong94/KDURUM/issues"
+  },
+  "homepage": "https://github.com/chungweileong94/KDURUM#readme",
+  "dependencies": {
+    "body-parser": "^1.18.2",
+    "cookie-session": "^2.0.0-beta.3",
+    "ejs": "^2.5.7",
+    "express": "^4.16.2",
+    "mongoose": "^5.0.3",
+    "passport": "^0.4.0",
+    "passport-facebook": "^2.1.1"
+  }
+}
