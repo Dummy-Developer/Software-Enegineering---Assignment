@@ -22,7 +22,7 @@
                 
             </div>
             <div role="tabpanel" class="tab-pane fade" :class="{in:user.roleIndex==0,active:user.roleIndex==0}" id="courses">
-                
+                <content-courses></content-courses>
             </div>
             <div role="tabpanel" class="tab-pane fade" v-if="user.roleIndex==0" id="users">
                 
@@ -36,10 +36,12 @@
 
 <script>
     import Profile from "./Profile.vue";
+    import Courses from "./Courses.vue";
 
     export default {
       components: {
-        "content-profile": Profile
+        "content-profile": Profile,
+        "content-courses": Courses
       },
       computed: {
         user() {
