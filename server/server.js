@@ -44,7 +44,7 @@ app.use("/auth", authRoute);
 app.use("/courses", coursesRoute);
 app.use("/users", usersRoute);
 
-//test
+//change user role - only for testing purpose
 const User = require("./models/user-model");
 app.get("/test/:no", (req, res) => {
     if (req.user) {
