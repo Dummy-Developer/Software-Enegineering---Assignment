@@ -1,42 +1,59 @@
 <template>
     <div class="container-fluid">
-        <div class="flex-container" v-if="courses.length!=0">
-            <div class="course-item col-md-4 col-sm-5 col-xs-12" v-for="c in courses" :key="c._id">
+        <div class="flex-container" v-if="(user.roleIndex==1 && coursesForLecture.length!=0) || (user.roleIndex!=1 && courses.length!=0)">
+            <!-- lecture content -->
+            <div class="course-item col-md-4 col-sm-5 col-xs-12" v-if="user.roleIndex==1" v-for="c in coursesForLecture" :key="c._id">
                 <div class="panel panel-default">
                     <div class="panel-body">
                         <h5>{{ c.title }}</h5>
 
-                        <!-- non-admin buttons -->
-                        <div v-if="user.roleIndex!=0">
-                            <a href="#" class="btn btn-md btn-primary" v-if="!c.isJoined" @click="joinCourse_Click((c._id))">Join</a>
-                            <div class="btn-group" v-if="c.isJoined">
-                                <a href="#" class="btn btn-success" @click="exploreCourse_Click(c)">Explore</a>
-                                <a href="#" class="btn btn-success dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
-                                    <span class="caret"></span>
-                                </a>
-                                <ul class="dropdown-menu">
-                                    <li>
-                                        <a href="#" @click="leaveCourse_Click(c._id)">Leave</a>
-                                    </li>
-                                </ul>
-                            </div>
+                        <div>
+                            <a href="#" class="btn btn-md btn-primary" @click="exploreCourse_Click(c)">Explore</a>
                         </div>
+                    </div>
+                </div>
+            </div>
 
-                        <!-- admin buttons -->
-                        <div class="btn-group" v-else>
-                            <a href="#" class="btn btn-md btn-success" @click="exploreCourse_Click(c)">Explore</a>
-                            <div class="btn-group">
-                                <a href="#" class="btn btn-primary" data-toggle="modal" data-target="#update-course-modal" @click="updateCourse_Click(c)">
-                                    <span class="glyphicon glyphicon-pencil"></span>&nbsp;&nbsp;Edit
-                                </a>
-                                <a href="#" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
-                                    <span class="caret"></span>
-                                </a>
-                                <ul class="dropdown-menu">
-                                    <li>
-                                        <a href="#" @click="deleteCourse_Click(c)" data-toggle="modal" data-target="#delete-course-modal">Delete</a>
-                                    </li>
-                                </ul>
+            <!-- admin & student content -->
+            <!-- this wrapper is to fix the v-else and v-for bug -->
+            <div v-else>
+                <div class="course-item col-md-4 col-sm-5 col-xs-12" v-for="c in courses" :key="c._id">
+                    <div class="panel panel-default">
+                        <div class="panel-body">
+                            <h5>{{ c.title }}</h5>
+
+                            <!-- student buttons -->
+                            <div v-if="user.roleIndex!=0">
+                                <a href="#" class="btn btn-md btn-primary" v-if="!c.isJoined" @click="joinCourse_Click((c._id))">Join</a>
+                                <div class="btn-group" v-if="c.isJoined">
+                                    <a href="#" class="btn btn-success" @click="exploreCourse_Click(c)">Explore</a>
+                                    <a href="#" class="btn btn-success dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                                        <span class="caret"></span>
+                                    </a>
+                                    <ul class="dropdown-menu">
+                                        <li>
+                                            <a href="#" @click="leaveCourse_Click(c._id)">Leave</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <!-- admin buttons -->
+                            <div class="btn-group" v-else>
+                                <a href="#" class="btn btn-md btn-success" @click="exploreCourse_Click(c)">Explore</a>
+                                <div class="btn-group">
+                                    <a href="#" class="btn btn-primary" data-toggle="modal" data-target="#update-course-modal" @click="updateCourse_Click(c)">
+                                        <span class="glyphicon glyphicon-pencil"></span>&nbsp;&nbsp;Edit
+                                    </a>
+                                    <a href="#" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                                        <span class="caret"></span>
+                                    </a>
+                                    <ul class="dropdown-menu">
+                                        <li>
+                                            <a href="#" @click="deleteCourse_Click(c)" data-toggle="modal" data-target="#delete-course-modal">Delete</a>
+                                        </li>
+                                    </ul>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -48,6 +65,7 @@
         <div class="text-center" style="padding-top: 150px;" v-else>
             <h3>Empty</h3>
             <p class="lead" v-if="user.roleIndex==0">You haven't add any courses yet</p>
+            <p class="lead" v-else-if="user.roleIndex==1">You haven't assign any courses yet</p>
             <p class="lead" v-else>There is no courses available yet</p>
         </div>
 
@@ -67,12 +85,26 @@
                     </div>
                     <div class="modal-body">
                         <div class="form-horizontal">
+                            <!-- Course title -->
                             <div class="form-group">
                                 <label class="col-sm-2 control-label" for="course-title-input">
                                     <b>Title</b>
                                 </label>
                                 <div class="col-sm-10">
                                     <input class="form-control" id="course-title-input" type="text" v-model="courseTitleInput">
+                                </div>
+                            </div>
+
+                            <!-- Course lecturer -->
+                            <div class="form-group">
+                                <label class="col-sm-2 control-label" for="course-title-input">
+                                    <b>Lecturer</b>
+                                </label>
+                                <div class="col-sm-10">
+                                    <select class="form-control" v-model="courseLecturerSelected">
+                                        <option selected value="">None</option>
+                                        <option :value="lecturer._id" v-for="lecturer in lecturers" :key="lecturer._id">{{ lecturer.name }}</option>
+                                    </select>
                                 </div>
                             </div>
                         </div>
@@ -97,6 +129,7 @@
                     </div>
                     <div class="modal-body">
                         <div class="form-horizontal">
+                            <!-- course title -->
                             <div class="form-group">
                                 <label class="col-sm-2 control-label" for="new-course-title-input">
                                     <b>New Title</b>
@@ -149,6 +182,7 @@
       data() {
         return {
           courseTitleInput: "",
+          courseLecturerSelected: "",
           courseTitleDeleteInput: "",
           selectedUpdateCourse: {},
           selectedDeleteCourse: {}
@@ -157,13 +191,17 @@
       methods: {
         refresCoursesAndEnrollment() {
           this.$store.dispatch("getUserData").then(() => {
-            this.$store.dispatch("getCoursesAndEnrollment");
+            this.$store.dispatch("getCourses");
           });
         },
         addCourse_Click() {
           this.$http
             .post("/courses/add", {
-              title: this.courseTitleInput
+              title: this.courseTitleInput,
+              lecturerId:
+                this.courseLecturerSelected == ""
+                  ? null
+                  : this.courseLecturerSelected
             })
             .then(data => {
               return data.status;
@@ -179,15 +217,18 @@
             });
         },
         updateCourse_Click(course) {
-          this.selectedUpdateCourse = course;
+          this.selectedUpdateCourse = {
+            _id: course._id,
+            title: course.title
+          };
         },
         updateCourseDialog_Click() {
           this.$http
             .put("/courses/update", {
-              course: this.selectedUpdateCourse
+              _id: this.selectedUpdateCourse._id,
+              title: this.selectedUpdateCourse.title
             })
             .then(data => {
-              console.log(data);
               return data.status;
             })
             .then(status => {
@@ -223,51 +264,30 @@
             });
         },
         joinCourse_Click(id) {
-          this.$http
-            .put(`/courses/join/${id}`)
-            .then(data => {
-              return data.status;
-            })
-            .then(status => {
-              if (status == 200) {
-                this.refresCoursesAndEnrollment();
-
-                alert("Joined course");
-              } else {
-                alert("Error");
-              }
-            });
+          
         },
         leaveCourse_Click(id) {
-          this.$http
-            .put(`/courses/leave/${id}`)
-            .then(data => {
-              return data.status;
-            })
-            .then(status => {
-              if (status == 200) {
-                this.refresCoursesAndEnrollment();
-
-                alert("Left course");
-              } else {
-                alert("Error");
-              }
-            });
+          
         },
         exploreCourse_Click(course) {
-          this.$store.commit("changeCurrentSelectedCourse", course);
-          this.$store.commit("switchView", this.CourseView);
+          
         }
       },
       computed: {
         user() {
           return this.$store.state.user;
         },
+        lecturers() {
+          return this.$store.state.lecturers;
+        },
+        coursesForLecture() {
+          return this.$store.state.coursesForLecture;
+        },
         courses() {
           return this.$store.state.courses;
         },
-        CourseView() {
-          return this.$store.state.CourseView;
+        Course() {
+          return this.$store.state.Course;
         }
       }
     };
