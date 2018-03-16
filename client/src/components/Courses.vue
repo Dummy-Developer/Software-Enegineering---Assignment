@@ -138,6 +138,19 @@
                                     <input class="form-control" id="new-course-title-input" type="text" v-model="selectedUpdateCourse.title">
                                 </div>
                             </div>
+
+                            <!-- Course lecturer -->
+                            <div class="form-group">
+                                <label class="col-sm-2 control-label" for="course-title-input">
+                                    <b>Lecturer</b>
+                                </label>
+                                <div class="col-sm-10">
+                                    <select class="form-control" v-model="selectedUpdateCourse.lecturerId">
+                                        <option selected value="">None</option>
+                                        <option :value="lecturer._id" v-for="lecturer in lecturers" :key="lecturer._id">{{ lecturer.name }}</option>
+                                    </select>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -219,14 +232,19 @@
         updateCourse_Click(course) {
           this.selectedUpdateCourse = {
             _id: course._id,
-            title: course.title
+            title: course.title,
+            lecturerId: !course.lecturer ? "" : course.lecturer._id
           };
         },
         updateCourseDialog_Click() {
           this.$http
             .put("/courses/update", {
               _id: this.selectedUpdateCourse._id,
-              title: this.selectedUpdateCourse.title
+              title: this.selectedUpdateCourse.title,
+              lecturerId:
+                this.selectedUpdateCourse.lecturerId == ""
+                  ? null
+                  : this.selectedUpdateCourse.lecturerId
             })
             .then(data => {
               return data.status;
@@ -264,13 +282,40 @@
             });
         },
         joinCourse_Click(id) {
-          
+          this.$http
+            .put(`/courses/join/${id}`)
+            .then(data => {
+              return data.status;
+            })
+            .then(status => {
+              if (status == 200) {
+                this.refresCoursesAndEnrollment();
+
+                alert("Joined course");
+              } else {
+                alert("Error");
+              }
+            });
         },
         leaveCourse_Click(id) {
-          
+          this.$http
+            .put(`/courses/leave/${id}`)
+            .then(data => {
+              return data.status;
+            })
+            .then(status => {
+              if (status == 200) {
+                this.refresCoursesAndEnrollment();
+
+                alert("Left course");
+              } else {
+                alert("Error");
+              }
+            });
         },
         exploreCourse_Click(course) {
-          
+          this.$store.commit("changeCurrentSelectedCourse", course);
+          this.$store.commit("switchView", this.Course);
         }
       },
       computed: {
