@@ -314,8 +314,6 @@
             });
         },
         exploreCourse_Click(course) {
-          this.$store.commit("changeCurrentSelectedCourse", course);
-          this.$store.commit("switchView", this.Course);
         }
       },
       computed: {
