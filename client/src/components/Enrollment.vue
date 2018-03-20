@@ -1,29 +1,40 @@
 <template>
-    <div class="container-fluid">
-        <div class="flex-container" v-if="user.enrollment.length!=0">
-            <div class="course-item col-md-3 col-sm-5 col-xs-12" v-for="c in user.enrollment" :key="c._id">
-                <div class="panel panel-default">
-                    <div class="panel-body">
-                        <h5>{{ c.title }}</h5>
+    <div>
+        <div v-if="user.enrollment.length!=0">
+            <!-- all enrolled course -->
+            <h5>
+                <span class="glyphicon glyphicon-stats"></span>&nbsp;&nbsp;All
+            </h5>
+            <hr>
+            <div class="flex-container">
+                <div class="course-item col-md-3 col-sm-5 col-xs-12 animation-intro" v-for="c in user.enrollment" :key="c._id">
+                    <div class="panel panel-default">
+                        <div class="panel-body">
+                            <h5>{{ c.title }}</h5>
 
-                        <div>
-                            <div class="btn-group">
-                                <a href="#" class="btn btn-success" @click="exploreCourse_Click(c)">Explore</a>
-                                <a href="#" class="btn btn-success dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
-                                    <span class="caret"></span>
-                                </a>
-                                <ul class="dropdown-menu">
-                                    <li>
-                                        <a href="#" @click="leaveCourse_Click(c._id)">Leave</a>
-                                    </li>
-                                </ul>
+                            <div>
+                                <div class="btn-group">
+                                    <a href="#" class="btn btn-success" @click="exploreCourse_Click(c)">Explore</a>
+                                    <a href="#" class="btn btn-success dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                                        <span class="caret"></span>
+                                    </a>
+                                    <ul class="dropdown-menu">
+                                        <li>
+                                            <a href="#" v-if="!user.favorites.find(f => f._id == c._id)" @click="markAsFavorite(c._id)">Mark as favorite</a>
+                                            <a href="#" v-else @click="removeFromFavorites(c._id)">Remove from favorites</a>
+                                            <a href="#" @click="leaveCourse_Click(c._id)">Leave</a>
+                                        </li>
+                                    </ul>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="text-center" style="padding-top: 150px;" v-else>
+
+        <!-- Empty message -->
+        <div class="text-center animation-intro" style="padding-top: 150px;" v-else>
             <h3>Empty</h3>
             <p class="lead">You haven't join any courses yet</p>
         </div>
@@ -55,13 +66,18 @@
             });
         },
         exploreCourse_Click(course) {
+          this.$store.commit("changeCurrentSelectedCourse", course);
+          this.$store.commit("switchView", {
+            view: this.CourseView,
+            needRefresh: true
+          });
         }
       },
       computed: {
         user() {
           return this.$store.state.user;
         },
-        Course() {
+        CourseView() {
           return this.$store.state.Course;
         }
       }
@@ -69,10 +85,26 @@
 </script>
 
 <style scoped>
+    @keyframes intro {
+      from {
+        opacity: 0;
+        zoom: 0;
+      }
+      to {
+        opacity: 1;
+        zoom: 1;
+      }
+    }
+
+    .animation-intro {
+      animation-name: intro;
+      animation-duration: 0.5s;
+    }
+
     .flex-container {
       display: flex;
       flex-wrap: wrap;
-      justify-content: center;
+      justify-content: flex-start;
     }
 
     .course-item {

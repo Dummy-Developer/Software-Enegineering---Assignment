@@ -1,14 +1,16 @@
 <template>
-    <div class="container-fluid">
-        <div class="flex-container" v-if="(user.roleIndex==1 && coursesForLecture.length!=0) || (user.roleIndex!=1 && courses.length!=0)">
+    <div>
+        <div v-if="(user.roleIndex==1 && coursesForLecture.length!=0) || (user.roleIndex!=1 && courses.length!=0)">
             <!-- lecture content -->
-            <div class="course-item col-md-4 col-sm-5 col-xs-12" v-if="user.roleIndex==1" v-for="c in coursesForLecture" :key="c._id">
-                <div class="panel panel-default">
-                    <div class="panel-body">
-                        <h5>{{ c.title }}</h5>
+            <div class="flex-container" v-if="user.roleIndex==1">
+                <div class="course-item col-md-4 col-sm-5 col-xs-12 animation-intro" v-for="c in coursesForLecture" :key="c._id">
+                    <div class="panel panel-default">
+                        <div class="panel-body">
+                            <h5>{{ c.title }}</h5>
 
-                        <div>
-                            <a href="#" class="btn btn-md btn-primary" @click="exploreCourse_Click(c)">Explore</a>
+                            <div>
+                                <a href="#" class="btn btn-md btn-primary" @click="exploreCourse_Click(c)">Explore</a>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -16,8 +18,8 @@
 
             <!-- admin & student content -->
             <!-- this wrapper is to fix the v-else and v-for bug -->
-            <div v-else>
-                <div class="course-item col-md-4 col-sm-5 col-xs-12" v-for="c in courses" :key="c._id">
+            <div class="flex-container" v-else>
+                <div class="course-item col-md-4 col-sm-5 col-xs-12 animation-intro" v-for="c in courses" :key="c._id">
                     <div class="panel panel-default">
                         <div class="panel-body">
                             <h5>{{ c.title }}</h5>
@@ -62,7 +64,7 @@
         </div>
 
         <!-- empty message -->
-        <div class="text-center" style="padding-top: 150px;" v-else>
+        <div class="text-center animation-intro" style="padding-top: 150px;" v-else>
             <h3>Empty</h3>
             <p class="lead" v-if="user.roleIndex==0">You haven't add any courses yet</p>
             <p class="lead" v-else-if="user.roleIndex==1">You haven't assign any courses yet</p>
@@ -314,6 +316,11 @@
             });
         },
         exploreCourse_Click(course) {
+          this.$store.commit("changeCurrentSelectedCourse", course);
+          this.$store.commit("switchView", {
+            view: this.CourseView,
+            needRefresh: true
+          });
         }
       },
       computed: {
@@ -329,7 +336,7 @@
         courses() {
           return this.$store.state.courses;
         },
-        Course() {
+        CourseView() {
           return this.$store.state.Course;
         }
       }
@@ -337,6 +344,22 @@
 </script>
 
 <style scoped>
+    @keyframes intro {
+      from {
+        opacity: 0;
+        zoom: 0;
+      }
+      to {
+        opacity: 1;
+        zoom: 1;
+      }
+    }
+
+    .animation-intro {
+      animation-name: intro;
+      animation-duration: 0.5s;
+    }
+
     .flex-container {
       display: flex;
       flex-wrap: wrap;

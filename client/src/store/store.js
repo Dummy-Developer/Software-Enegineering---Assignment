@@ -24,19 +24,25 @@ export const store = new Vuex.Store({
         currentSelectedCourse: {},
         currentSelectedForum: {},
         currentView: null,
+        forums: [],
         MainView: MainView,
         Course: Course,
-        Forum: Forum
+        Forum: Forum,
+        needRefresh: true
     },
     mutations: {
-        switchView(state, view) {
-            state.currentView = view;
+        switchView(state, payload) {
+            state.needRefresh = payload.needRefresh;
+            state.currentView = payload.view;
         },
         changeCurrentSelectedCourse(state, course) {
             state.currentSelectedCourse = course;
         },
-        changeCurrentSelectectForum(state, forum) {
+        changeCurrentSelectedForum(state, forum) {
             state.currentSelectedForum = forum;
+        },
+        saveForumList(state, forums) {
+            state.forums = forums;
         }
     },
     actions: {
@@ -48,6 +54,7 @@ export const store = new Vuex.Store({
                     user.name = data.body.name;
                     user.thumnail = data.body.thumnail;
                     user.roleIndex = data.body.role;
+                    user.favorites = data.body.favorites;
                     user.enrollment = data.body.enrollment;
                     switch (data.body.role) {
                         case 0:
