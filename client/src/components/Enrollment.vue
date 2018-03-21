@@ -49,6 +49,38 @@
             this.$store.dispatch("getCourses");
           });
         },
+        markAsFavorite(id) {
+          this.$http
+            .put(`/courses/favorites/add/${id}`)
+            .then(data => {
+              return data.status;
+            })
+            .then(status => {
+              if (status == 200) {
+                this.refresCoursesAndEnrollment();
+
+                alert("The course is added to your favorite list");
+              } else {
+                alert("Error");
+              }
+            });
+        },
+        removeFromFavorites(id) {
+          this.$http
+            .put(`/courses/favorites/remove/${id}`)
+            .then(data => {
+              return data.status;
+            })
+            .then(status => {
+              if (status == 200) {
+                this.refresCoursesAndEnrollment();
+
+                alert("The course is removed to your favorite list");
+              } else {
+                alert("Error");
+              }
+            });
+        },
         leaveCourse_Click(id) {
           this.$http
             .put(`/courses/leave/${id}`)
