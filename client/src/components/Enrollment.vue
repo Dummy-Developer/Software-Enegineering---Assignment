@@ -1,6 +1,38 @@
 <template>
     <div>
         <div v-if="user.enrollment.length!=0">
+            <!-- favorite course -->
+            <div v-if="user.favorites.length!=0">
+                <h5>
+                    <span class="glyphicon glyphicon-star"></span>&nbsp;&nbsp;Favorite
+                </h5>
+                <hr>
+                <div class="flex-container">
+                    <div class="course-item col-md-3 col-sm-5 col-xs-12 animation-intro" v-for="c in user.favorites" :key="c._id">
+                        <div class="panel panel-default">
+                            <div class="panel-body">
+                                <h5>{{ c.title }}</h5>
+
+                                <div>
+                                    <div class="btn-group">
+                                        <a href="#" class="btn btn-success" @click="exploreCourse_Click(c)">Explore</a>
+                                        <a href="#" class="btn btn-success dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                                            <span class="caret"></span>
+                                        </a>
+                                        <ul class="dropdown-menu">
+                                            <li>
+                                                <a href="#" @click="removeFromFavorites(c._id)">Remove from favorites</a>
+                                                <a href="#" @click="leaveCourse_Click(c._id)">Leave</a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- all enrolled course -->
             <h5>
                 <span class="glyphicon glyphicon-stats"></span>&nbsp;&nbsp;All
