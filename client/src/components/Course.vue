@@ -147,7 +147,12 @@
             });
         },
         forumItem_Click(forum) {
-          
+          this.$store.commit("changeCurrentSelectedForum", forum);
+          this.$store.commit("saveForumList", this.forums);
+          this.$store.commit("switchView", {
+            view: this.ForumView,
+            needRefresh: false
+          });
         }
       },
       computed: {
@@ -197,7 +202,7 @@
       padding-top: 16px;
       background-color: white;
       /* position: -webkit-sticky;
-                                  position: sticky; */
+                              position: sticky; */
       position: fixed;
       top: 64px;
       right: 10%;
