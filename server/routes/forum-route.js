@@ -54,4 +54,17 @@ router.post("/comment/add", (req, res) => {
     });
 });
 
+//get comments
+router.get("/comment/all/:id", (req, res) => {
+    if (!req.user) return res.sendStatus(401);
+    if (!req.params.id) return res.sendStatus(404);
+
+    Comment.find({
+        forumId: req.params.id
+    }).populate("user").exec((err, comments) => {
+        if (err) throw err;
+        return res.status(200).json(comments);
+    });
+});
+
 module.exports = router;

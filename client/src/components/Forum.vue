@@ -18,7 +18,41 @@
             <hr>
         </div>
 
-        
+        <div class="content animation-intro">
+            <!-- forum header -->
+            <div id="forum-header">
+                <h4>
+                    <b>Title: </b>{{ forum.title }}
+                </h4>
+                <p class="lead" v-html="preProcessText(forum.desc)"></p>
+            </div>
+
+            <div id="forum-comments">
+                <h4 class="text-center">
+                    <span class="glyphicon glyphicon-comment"></span>&nbsp;&nbsp;Comments
+                </h4>
+                <hr>
+
+                <div v-if="comments.length!=0">
+                    <div class="animation-intro" v-for="c in comments" :key="c._id">
+                        <div class="well">
+                            <p>
+                                <img class="comment-user-image img-circle" :src="c.user.thumnail" v-if="c.user!=null">
+                                <b>{{ c.user==null ? "Unknown" : c.user.name }}</b>
+                            </p>
+                            <p v-html="preProcessText(c.content)"></p>
+
+                            <p class="text-right">commented {{moment(c.createDateTime)}}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- empty message -->
+                <div class="text-center" v-else>
+                    <h4 class="lead">- No Comments -</h4>
+                </div>
+            </div>
+        </div>
 
         <button id="comment-button" class="btn btn-warning" data-toggle="modal" data-target="#add-comment-modal">Add Comment</button>
 
@@ -72,11 +106,11 @@
             .replace(exp, "<a target='_blank' href='$1'>$1</a>")
             .replace(/\n\r?/g, "<br />");
         },
-        back() {
+        back(needRefresh = false) {
           this.$store.commit("changeCurrentSelectedForum", {}); //clear selection
           this.$store.commit("switchView", {
             view: this.CourseView,
-            needRefresh: false
+            needRefresh: needRefresh
           });
         },
         addComment_Click() {
@@ -96,6 +130,16 @@
                 alert("Error");
               }
             });
+        },
+        refreshComments() {
+          this.$http
+            .get(`/forum/comment/all/${this.forum._id}`)
+            .then(data => {
+              return data.json();
+            })
+            .then(data => {
+              this.comments = data;
+            });
         }
       },
       computed: {
@@ -104,6 +148,9 @@
         },
         CourseView() {
           return this.$store.state.Course;
+        },
+        user() {
+          return this.$store.state.user;
         }
       },
       created() {
@@ -142,6 +189,7 @@
       top: 64px;
       right: 10%;
       left: 10%;
+      z-index: 10;
     }
 
     @media screen and (max-width: 1500px) {
