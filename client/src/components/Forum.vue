@@ -18,13 +18,35 @@
             <hr>
         </div>
 
-        <div class="content animation-intro">
-            <!-- forum header -->
-            <div id="forum-header">
-                <h4>
-                    <b>Title: </b>{{ forum.title }}
-                </h4>
-                <p class="lead" v-html="preProcessText(forum.desc)"></p>
+        
+
+        <button id="comment-button" class="btn btn-warning" data-toggle="modal" data-target="#add-comment-modal">Add Comment</button>
+
+        <!-- add comment dialog -->
+        <div id="add-comment-modal" class="modal fade">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button class="close" aria-hidden="true" type="button" data-dismiss="modal">&times;</button>
+                        <h4 class="modal-title">
+                            <span class="glyphicon glyphicon-th-list"></span>&nbsp;&nbsp;Add Comment
+                        </h4>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-horizontal">
+                            <!-- comment -->
+                            <div class="form-group">
+                                <div class="col-sm-12">
+                                    <textarea class="form-control" id="forum-desc-input" rows="3" v-model="commentInput"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-default" type="button" data-dismiss="modal">Cancel</button>
+                        <button class="btn btn-success" type="button" data-dismiss="modal" :disabled="commentInput.trim().length==0" @click="addComment_Click">Add</button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -34,6 +56,12 @@
     const moment = require("moment");
 
     export default {
+      data() {
+        return {
+          commentInput: "",
+          comments: ""
+        };
+      },
       methods: {
         moment(date) {
           return moment(date).fromNow();
@@ -50,6 +78,24 @@
             view: this.CourseView,
             needRefresh: false
           });
+        },
+        addComment_Click() {
+          this.$http
+            .post("/forum/comment/add", {
+              forumId: this.forum._id,
+              content: this.commentInput
+            })
+            .then(data => {
+              return data.status;
+            })
+            .then(status => {
+              if (status == 200) {
+                this.refreshComments();
+                alert("Comment added");
+              } else {
+                alert("Error");
+              }
+            });
         }
       },
       computed: {
@@ -91,8 +137,7 @@
     #title-bar {
       padding-top: 16px;
       background-color: white;
-      /* position: -webkit-sticky;
-                                                                                                                                                                  position: sticky; */
+      /* position: -webkit-sticky;                                                                                                                                    position: sticky; */
       position: fixed;
       top: 64px;
       right: 10%;
@@ -152,6 +197,10 @@
     #forum-comments hr {
       border-top-width: 2px;
       width: 30%;
+    }
+
+    .comment-user-image {
+      max-width: 30px;
     }
 
     #comment-button {

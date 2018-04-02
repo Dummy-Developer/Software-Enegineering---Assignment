@@ -36,4 +36,22 @@ router.post("/add", (req, res) => {
     });
 });
 
+//add comment
+router.post("/comment/add", (req, res) => {
+    if (!req.user) return res.sendStatus(401);
+    if (!req.body) return res.sendStatus(404);
+
+    let newComment = req.body;
+
+    new Comment({
+        forumId: newComment.forumId,
+        user: req.user._id,
+        content: newComment.content,
+        createDateTime: Date.now()
+    }).save((err, result) => {
+        if (err) throw err;
+        return res.sendStatus(200);
+    });
+});
+
 module.exports = router;
