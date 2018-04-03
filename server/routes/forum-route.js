@@ -36,6 +36,32 @@ router.post("/add", (req, res) => {
     });
 });
 
+//remove forum
+router.delete("/remove/:id", (req, res) => {
+    if (!req.user) return res.sendStatus(401);
+    if (!req.params.id) return res.sendStatus(500);
+
+    let id = req.params.id;
+
+    Forum.findById(id, (err, forum) => {
+        if (err) throw err;
+        //check privilege
+        if (!forum.owner.equals(req.user._id)) {
+            if (req.user.role != 0) {
+                return res.sendStatus(401);
+            }
+        }
+
+        forum.remove(err_forum => {
+            Comment.find({ forumId: id }).remove(err_comments => {
+                if (err_comments) throw err_comments;
+
+                return res.sendStatus(200);
+            });
+        });
+    });
+});
+
 //add comment
 router.post("/comment/add", (req, res) => {
     if (!req.user) return res.sendStatus(401);
