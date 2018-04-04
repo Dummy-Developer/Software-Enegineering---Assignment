@@ -1,7 +1,7 @@
 <template>
     <div>
         <div id="title-bar">
-            <a id="back-button" href="#" @click="back">
+            <a id="back-button" href="#" @click="back(false)">
                 <span class="glyphicon glyphicon-chevron-left"></span>
             </a>
             <div class="created-time-wrapper animation-intro">
@@ -25,6 +25,15 @@
                     <b>Title: </b>{{ forum.title }}
                 </h4>
                 <p class="lead" v-html="preProcessText(forum.desc)"></p>
+
+                <div class="container" v-if="(forum.owner!=null && forum.owner._id==user._id) || user.roleIndex==0">
+                    <div class="row">
+                        <div class="btn-group pull-right">
+                            <button class="btn btn-sm btn-primary" data-toggle="modal" data-target="#edit-forum-modal" @click="editForum_Click">Edit</button>
+                            <button class="btn btn-sm btn-danger" data-toggle="modal" data-target="#delete-forum-modal">Remove</button>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <div id="forum-comments">
@@ -83,6 +92,27 @@
                 </div>
             </div>
         </div>
+
+        <!-- delete modal -->
+        <div id="delete-forum-modal" class="modal fade" v-if="(forum.owner!=null && forum.owner._id==user._id) || user.roleIndex==0">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button class="close" aria-hidden="true" type="button" data-dismiss="modal">&times;</button>
+                        <h4 class="modal-title">
+                            <span class="glyphicon glyphicon-trash"></span>&nbsp;&nbsp;Delete post
+                        </h4>
+                    </div>
+                    <div class="modal-body">
+                        <p>Are you to remove the post?</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-default" type="button" data-dismiss="modal">No</button>
+                        <button class="btn btn-danger" type="button" data-dismiss="modal" @click="removeForum_Click">Yes</button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </template>
 
@@ -92,8 +122,14 @@
     export default {
       data() {
         return {
+          comments: "",
           commentInput: "",
-          comments: ""
+          forumTitleInput: "",
+          forumDescInput: "",
+          bakForum: {
+            title: "",
+            desc: ""
+          }
         };
       },
       methods: {
@@ -106,12 +142,27 @@
             .replace(exp, "<a target='_blank' href='$1'>$1</a>")
             .replace(/\n\r?/g, "<br />");
         },
-        back(needRefresh = false) {
+        back(needRefresh) {
           this.$store.commit("changeCurrentSelectedForum", {}); //clear selection
           this.$store.commit("switchView", {
             view: this.CourseView,
             needRefresh: needRefresh
           });
+        },
+        removeForum_Click() {
+          this.$http
+            .delete(`/forum/remove/${this.forum._id}`)
+            .then(data => {
+              return data.status;
+            })
+            .then(status => {
+              if (status == 200) {
+                this.back(true);
+                alert("Post removed");
+              } else {
+                alert("Error");
+              }
+            });
         },
         addComment_Click() {
           this.$http
@@ -125,7 +176,6 @@
             .then(status => {
               if (status == 200) {
                 this.refreshComments();
-                alert("Comment added");
               } else {
                 alert("Error");
               }
