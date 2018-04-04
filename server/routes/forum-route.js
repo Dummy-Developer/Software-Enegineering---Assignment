@@ -5,7 +5,7 @@ const Comment = require("./../models/comment-model");
 //get all forum with course ID
 router.get("/all/:id", (req, res) => {
     if (!req.user) return res.sendStatus(401);
-    if (!req.params.id) return res.sendStatus(404);
+    if (!req.params.id) return res.sendStatus(500);
 
     let courseId = req.params.id;
 
@@ -20,7 +20,7 @@ router.get("/all/:id", (req, res) => {
 //add new forum
 router.post("/add", (req, res) => {
     if (!req.user) return res.sendStatus(401);
-    if (!req.body) return res.sendStatus(404);
+    if (!req.body) return res.sendStatus(500);
 
     let newForum = req.body;
 
@@ -33,6 +33,31 @@ router.post("/add", (req, res) => {
     }).save((err, result) => {
         if (err) throw err;
         return res.sendStatus(200);
+    });
+});
+
+//update forum
+router.put("/update", (req, res) => {
+    if (!req.user) return res.sendStatus(401);
+    if (!req.body) return res.sendStatus(500);
+
+    Forum.findById(req.body.id, (err, forum) => {
+        if (err) throw err;
+        //check privilege
+        if (!forum.owner.equals(req.user._id)) {
+            if (req.user.role != 0) {
+                return res.sendStatus(401);
+            }
+        }
+
+        forum.title = req.body.title;
+        forum.desc = req.body.desc;
+
+        forum.save((err_forum_save, forum_save) => {
+            if (err_forum_save) throw err_forum_save;
+
+            return res.sendStatus(200);
+        });
     });
 });
 
@@ -65,7 +90,7 @@ router.delete("/remove/:id", (req, res) => {
 //add comment
 router.post("/comment/add", (req, res) => {
     if (!req.user) return res.sendStatus(401);
-    if (!req.body) return res.sendStatus(404);
+    if (!req.body) return res.sendStatus(500);
 
     let newComment = req.body;
 
@@ -83,7 +108,7 @@ router.post("/comment/add", (req, res) => {
 //get comments
 router.get("/comment/all/:id", (req, res) => {
     if (!req.user) return res.sendStatus(401);
-    if (!req.params.id) return res.sendStatus(404);
+    if (!req.params.id) return res.sendStatus(500);
 
     Comment.find({
         forumId: req.params.id
