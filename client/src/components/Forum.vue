@@ -26,7 +26,7 @@
                 </h4>
                 <p class="lead" v-html="preProcessText(forum.desc)"></p>
 
-                <div class="container" v-if="(forum.owner!=null && forum.owner._id==user._id) || user.roleIndex==0">
+                <div class="container" v-if="(forum.owner!=null && forum.owner._id==user._id) || user.roleIndex==0 || (course.lecturer!=null && course.lecturer._id==user._id && course.lecturer.role==1)">
                     <div class="row">
                         <div class="btn-group pull-right">
                             <button class="btn btn-sm btn-primary" data-toggle="modal" data-target="#edit-forum-modal" @click="editForum_Click">Edit</button>
@@ -42,6 +42,7 @@
                 </h4>
                 <hr>
 
+                <!-- comments section -->
                 <div v-if="comments.length!=0">
                     <div class="animation-intro" v-for="c in comments" :key="c._id">
                         <div class="well">
@@ -51,7 +52,12 @@
                             </p>
                             <p v-html="preProcessText(c.content)"></p>
 
-                            <p class="text-right">commented {{moment(c.createDateTime)}}</p>
+                            <div>
+                                <button :class="[{likedButton:c.isLiked}, 'like-button']" @click="likeComment($event, c)">
+                                    <span class="glyphicon glyphicon-thumbs-up text-left"></span> {{c.likes.length}}
+                                </button>
+                                <p style="float:right;">commented {{moment(c.createDateTime)}}</p>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -170,7 +176,8 @@
           bakForum: {
             title: "",
             desc: ""
-          }
+          },
+          isDisable: false
         };
       },
       methods: {
@@ -178,9 +185,15 @@
           return moment(date).fromNow();
         },
         preProcessText(text) {
-          const exp = /(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/gi;
+          const link_exp = /(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/gi;
+          const email_exp = /([\w-\.]+)@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.)|(([\w-]+\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})(\]?)/gi;
+
           return text
-            .replace(exp, "<a target='_blank' href='$1'>$1</a>")
+            .replace(link_exp, "<a target='_blank' href='$1'>$1</a>")
+            .replace(
+              email_exp,
+              "<a target='_blank' href='mailto:$1@$2$6$7'>$1@$2$6$7</a>"
+            )
             .replace(/\n\r?/g, "<br />");
         },
         back(needRefresh) {
@@ -248,6 +261,46 @@
               }
             });
         },
+        likeComment(event, comment) {
+          if (this.isDisable) return;
+
+          this.isDisable = true;
+          if (comment.isLiked) {
+            this.$http
+              .put(`/forum/comment/unlike/${comment._id}`)
+              .then(data => {
+                return data.status;
+              })
+              .then(status => {
+                if (status == 200) {
+                  this.isDisable = false;
+                  comment.isLiked = false;
+                  comment.likes.splice(comment.likes.indexOf(this.user._id), 1);
+                  event.target.className.toggle("likedButton");
+                } else {
+                  this.isDisable = false;
+                  alert("Error");
+                }
+              });
+          } else {
+            this.$http
+              .put(`/forum/comment/like/${comment._id}`)
+              .then(data => {
+                return data.status;
+              })
+              .then(status => {
+                if (status == 200) {
+                  this.isDisable = false;
+                  comment.isLiked = true;
+                  comment.likes.push(this.user._id);
+                  event.target.className.toggle("likedButton");
+                } else {
+                  this.isDisable = false;
+                  alert("Error");
+                }
+              });
+          }
+        },
         refreshComments() {
           this.$http
             .get(`/forum/comment/all/${this.forum._id}`)
@@ -256,10 +309,21 @@
             })
             .then(data => {
               this.comments = data;
+
+              this.comments.forEach((comment, index) => {
+                comment.isLiked = comment.likes.find(userId => {
+                  return userId == this.user._id;
+                });
+
+                if (comment.isLiked == undefined) comment.isLiked = false;
+              });
             });
         }
       },
       computed: {
+        course() {
+          return this.$store.state.currentSelectedCourse;
+        },
         forum() {
           return this.$store.state.currentSelectedForum;
         },
@@ -372,5 +436,18 @@
       position: fixed;
       right: 30px;
       bottom: 30px;
+    }
+
+    .like-button {
+      text-decoration-style: none;
+      color: black;
+      text-decoration: none;
+      cursor: pointer;
+      border: none;
+      background-color: transparent;
+    }
+
+    .likedButton {
+      color: #149c82;
     }
 </style>
