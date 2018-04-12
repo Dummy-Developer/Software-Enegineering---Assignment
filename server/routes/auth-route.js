@@ -27,7 +27,7 @@ router.get("/login",
 //logout
 router.get("/logout", (req, res) => {
     req.logout();
-    res.redirect("/");
+    res.redirect("/"); //this will lead to the login page as well
 });
 
 //auth with facebook
