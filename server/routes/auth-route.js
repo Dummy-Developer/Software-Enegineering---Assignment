@@ -1,11 +1,16 @@
 const router = require("express").Router();
 const path = require("path");
 const passport = require("passport");
+const User = require("./../models/user-model");
 
 //get user data
 router.get("/user", (req, res) => {
     if (req.user) {
-        res.json(req.user);
+        User.findOne({ _id: req.user })
+            .deepPopulate(["enrollment", "favorites", "enrollment.lecturer", "favorites.lecturer"])
+            .exec((err, data) => {
+                return res.json(data);
+            });
     } else {
         null;
     }
@@ -27,7 +32,7 @@ router.get("/login",
 //logout
 router.get("/logout", (req, res) => {
     req.logout();
-    res.redirect("/"); //this will lead to the login page as well
+    res.redirect("/");
 });
 
 //auth with facebook

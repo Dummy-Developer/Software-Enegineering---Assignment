@@ -10,6 +10,7 @@ const authRoute = require("./routes/auth-route");
 const homeRoute = require("./routes/home-route");
 const coursesRoute = require("./routes/courses-route");
 const usersRoute = require("./routes/users-route");
+const forumRoute = require("./routes/forum-route");
 
 const PORT = process.env.PORT || process.env.port || 8888;
 
@@ -43,8 +44,9 @@ app.use("/", homeRoute);
 app.use("/auth", authRoute);
 app.use("/courses", coursesRoute);
 app.use("/users", usersRoute);
+app.use("/forum", forumRoute);
 
-//change user role - only for testing purpose
+//test
 const User = require("./models/user-model");
 app.get("/test/:no", (req, res) => {
     if (req.user) {

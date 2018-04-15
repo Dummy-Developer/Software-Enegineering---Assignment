@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const deepPopulate = require("mongoose-deep-populate")(mongoose);
 const Schema = mongoose.Schema;
 
 const userSchema = new Schema({
@@ -8,8 +9,11 @@ const userSchema = new Schema({
     email: String,
     thumnail: String,
     role: Number, //0: admin, 1: lecture, 2: student
-    enrollment: [String]
+    favorites: [{ type: Schema.Types.ObjectId, ref: "course" }],
+    enrollment: [{ type: Schema.Types.ObjectId, ref: "course" }]
 });
+
+userSchema.plugin(deepPopulate);
 
 const User = mongoose.model("user", userSchema);
 
