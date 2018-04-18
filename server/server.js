@@ -7,9 +7,9 @@ const cookieSession = require("cookie-session");
 const passportSetup = require("./config/passport-setup");
 const keys = require("./config/keys");
 const authRoute = require("./routes/auth-route");
-const homeRoute = require("./routes/home-route");
 const coursesRoute = require("./routes/courses-route");
 const usersRoute = require("./routes/users-route");
+const forumRoute = require("./routes/forum-route");
 
 const PORT = process.env.PORT || process.env.port || 8888;
 
@@ -20,12 +20,10 @@ mongoose.connect(keys.mongodb.databaseUri, (err) => {
 });
 
 let app = express();
-app.use("/dist", express.static(path.join(__dirname, "../client/dist")));
-
-app.set("views", path.join(__dirname, "../client/views"));
+app.use("/", express.static(path.join(__dirname, "../client/dist")));
 
 //setup parser
-app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
 
 //setup cookie session
@@ -39,16 +37,16 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 //setup route
-app.use("/", homeRoute);
 app.use("/auth", authRoute);
 app.use("/courses", coursesRoute);
 app.use("/users", usersRoute);
+app.use("/forum", forumRoute);
 
-//change user role - only for testing purpose
+//test
 const User = require("./models/user-model");
 app.get("/test/:no", (req, res) => {
     if (req.user) {
-        User.findOne({ _id: req.user._id }, (err, user) => {
+        User.findOne({_id: req.user._id}, (err, user) => {
             user.role = req.params.no;
             user.save((err, result) => {
                 if (err) throw err;
@@ -56,6 +54,10 @@ app.get("/test/:no", (req, res) => {
             });
         });
     }
+});
+
+app.use("*", (req, res) => {
+    res.redirect("/");
 });
 
 app.listen(PORT, () => {

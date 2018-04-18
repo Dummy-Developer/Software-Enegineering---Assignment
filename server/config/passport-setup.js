@@ -36,12 +36,13 @@ passport.use(
                         email: profile._json.email,
                         thumnail: profile._json.picture.data.url,
                         role: 2,
+                        favorites: [],
                         enrollment: []
                     }).save().then((newUser) => {
                         console.log(`New user created: ${newUser}`);
                         cb(null, newUser);
                     });
                 }
-            })
+            });
     })
 );
