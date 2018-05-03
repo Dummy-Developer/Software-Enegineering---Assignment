@@ -1,5 +1,6 @@
 # KDURUM
 Software Engineering Assignment
+> If you attempt to run the code, you might get an error regarding to a missing "key.js" file, because the file contains all the api ids and secret keys, so it is not include in this repository. Please request the file from me if necessary.
 
 # How to run the app
 1. Install [Visual Studio Code](https://code.visualstudio.com/)
